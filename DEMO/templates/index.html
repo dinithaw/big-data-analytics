@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Yield Prediction</title>
+    <script>
+        async function getPrediction() {
+            let formData = {
+                "Area": document.getElementById("area").value,
+                "Rainfall": document.getElementById("rainfall").value,
+                "Temperature": document.getElementById("temperature").value,
+                "Price": document.getElementById("price").value
+            };
+
+            let response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            let data = await response.json();
+            document.getElementById("result").innerText = "Predicted Yield: " + data.prediction;
+        }
+    </script>
+</head>
+<body>
+    <h2>Crop Yield Prediction</h2>
+    <label>Area: <input type="number" id="area"></label><br>
+    <label>Rainfall: <input type="number" id="rainfall"></label><br>
+    <label>Temperature: <input type="number" id="temperature"></label><br>
+    <label>Price: <input type="number" id="price"></label><br>
+    <button onclick="getPrediction()">Predict</button>
+    <p id="result"></p>
+</body>
+</html>
