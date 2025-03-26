@@ -53,7 +53,7 @@ def predict():
         # Make prediction
         prediction = model.predict(df)[0]
 
-        return jsonify({'prediction': float(prediction)})
+        return jsonify({'prediction': float(prediction*15000)})
 
     except Exception as e:
         print("Error:", str(e))
