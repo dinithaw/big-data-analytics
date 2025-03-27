@@ -4,7 +4,7 @@ import plotly.express as px
 import pandas as pd
 
 conn = snowflake.connector.connect(
-    account="YMBZKCC-NT32058", user="UMI", password="Umair2002121212",
+    account="YMBZKCC-NT32058", user="####", password="########",
     database="AGRICULTURE_DB", schema="DATA_ANALYSIS", warehouse="COMPUTE_WH", role="ACCOUNTADMIN"
 )
 
