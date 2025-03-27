@@ -1,0 +1,58 @@
+cloud analytics setup
+
+
+CREATE OR REPLACE TABLE agriculture_raw (
+    Year INT,
+    Location STRING,
+    Area FLOAT,
+    Rainfall FLOAT,
+    Temperature FLOAT,
+    Soil_type STRING,
+    Irrigation STRING,
+    Yields FLOAT,  
+    Humidity FLOAT,
+    Crops STRING,
+    Price FLOAT,
+    Season STRING
+);
+
+
+COPY INTO agriculture_raw
+FROM @agriculture_stage/data_season.csv.gz
+FILE_FORMAT = (TYPE = 'CSV' FIELD_DELIMITER = ',' SKIP_HEADER = 1)
+ON_ERROR = 'CONTINUE';
+
+SELECT COUNT(*) as row_count FROM agriculture_raw;
+
+
+SELECT * FROM agriculture_raw LIMIT 5;
+
+
+
+
+
+CREATE OR REPLACE TABLE fertilizer_usage (
+    Year INT,
+    Location STRING,
+    Crop STRING,
+    Fertilizer_Amount FLOAT  -- kg/ha
+);
+
+INSERT INTO fertilizer_usage VALUES
+(2004, 'Mangalore', 'Coconut', 150.0),
+(2004, 'Kodagu', 'Coconut', 120.0),
+(2018, 'Hassan', 'Tea', 200.0),
+(2018, 'Hassan', 'Paddy', 180.0),
+(2019, 'Mangalore', 'Coconut', 160.0);
+
+
+
+CREATE OR REPLACE TABLE agriculture_integrated AS
+SELECT 
+    a.Year, a.Location, a.Area, a.Rainfall, a.Temperature, a.Soil_type,
+    a.Irrigation, a.Yields, a.Humidity, a.Crops, a.Price, a.Season,
+    COALESCE(f.Fertilizer_Amount, 0) AS Fertilizer_Amount
+FROM agriculture_raw a
+LEFT JOIN fertilizer_usage f
+ON a.Year = f.Year AND a.Location = f.Location AND a.Crops = f.Crop;
+

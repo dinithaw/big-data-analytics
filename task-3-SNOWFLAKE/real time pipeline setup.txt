@@ -1,0 +1,72 @@
+-- Create a stream to capture changes in the data
+CREATE OR REPLACE STREAM agriculture_stream ON TABLE agriculture_data_stream;
+
+-- Create a summary table for real-time aggregates
+CREATE OR REPLACE TABLE agriculture_summary (
+    Crops STRING, 
+    Location STRING, 
+    Avg_Yields FLOAT, 
+    Avg_Rainfall FLOAT,
+    Avg_Temperature FLOAT, 
+    Avg_Price FLOAT, 
+    Record_Count INT, 
+    Latest_Update TIMESTAMP
+);
+
+-- Create a task to process the stream every minute
+CREATE OR REPLACE TASK process_agriculture_stream
+WAREHOUSE = 'COMPUTE_WH'
+SCHEDULE = '1 MINUTE'
+AS
+INSERT INTO agriculture_summary
+SELECT 
+    Crops, 
+    Location, 
+    AVG(Yields) AS Avg_Yields, 
+    AVG(Rainfall) AS Avg_Rainfall, 
+    AVG(Temperature) AS Avg_Temperature, 
+    AVG(Price) AS Avg_Price,
+    COUNT(*) AS Record_Count, 
+    MAX(Ingestion_Time) AS Latest_Update
+FROM agriculture_stream
+GROUP BY Crops, Location;
+
+-- Resume the task to start processing
+ALTER TASK process_agriculture_stream RESUME;
+
+-- Create a view for trend visualization (for dashboard)
+CREATE OR REPLACE VIEW agriculture_trends AS
+SELECT 
+    Crops, 
+    DATE_TRUNC('MINUTE', Ingestion_Time) AS Minute, 
+    AVG(Yields) AS Avg_Yields,
+    AVG(Rainfall) AS Avg_Rainfall,
+    AVG(Temperature) AS Avg_Temperature
+FROM agriculture_data_stream
+GROUP BY Crops, DATE_TRUNC('MINUTE', Ingestion_Time)
+ORDER BY Minute DESC;
+
+-- Create a view for anomaly visualization (for dashboard)
+CREATE OR REPLACE VIEW agriculture_anomalies AS
+WITH stats AS (
+    SELECT 
+        Crops, 
+        AVG(Yields) AS Mean_Yields, 
+        STDDEV(Yields) AS Std_Yields
+    FROM agriculture_data_stream 
+    GROUP BY Crops 
+    HAVING COUNT(*) > 1
+)
+SELECT 
+    a.Crops, 
+    a.Yields, 
+    a.Ingestion_Time,
+    CASE WHEN s.Std_Yields = 0 THEN NULL ELSE (a.Yields - s.Mean_Yields) / s.Std_Yields END AS Z_Score
+FROM agriculture_data_stream a
+JOIN stats s ON a.Crops = s.Crops
+WHERE ABS(CASE WHEN s.Std_Yields = 0 THEN NULL ELSE (a.Yields - s.Mean_Yields) / s.Std_Yields END) > 3
+ORDER BY a.Ingestion_Time DESC;
+
+-- Query for dashboard: Latest summary
+SELECT * FROM agriculture_summary
+WHERE Latest_Update >= CURRENT_TIMESTAMP - INTERVAL '5 MINUTE';

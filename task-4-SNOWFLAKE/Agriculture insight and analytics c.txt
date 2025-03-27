@@ -1,0 +1,83 @@
+Agriculture insight and analytics clous task 4
+
+1.Trend: Yield Trends by Crop Over Years
+
+SELECT 
+    Year, 
+    Crops, 
+    AVG(Yields) AS Avg_Yields, 
+    COUNT(*) AS Record_Count
+FROM agriculture_integrated
+GROUP BY Year, Crops
+ORDER BY Year, Avg_Yields DESC;
+
+SELECT 
+    Year, 
+    Crops, 
+    AVG(Yields) AS Avg_Yields, 
+    COUNT(*) AS Record_Count
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+WHERE Yields < 200000  -- Filter outliers
+GROUP BY Year, Crops
+ORDER BY Year, Avg_Yields DESC;
+
+2.Summary: Location and Soil Type Performance
+
+SELECT 
+    Location, 
+    Soil_type, 
+    AVG(Yields) AS Avg_Yields, 
+    AVG(Rainfall) AS Avg_Rainfall, 
+    AVG(Fertilizer_Amount) AS Avg_Fertilizer,
+    COUNT(*) AS Record_Count
+FROM agriculture_integrated
+GROUP BY Location, Soil_type
+ORDER BY Avg_Yields DESC;
+
+
+
+SELECT 
+    Location, 
+    Soil_type, 
+    AVG(Yields) AS Avg_Yields, 
+    AVG(Rainfall) AS Avg_Rainfall, 
+    AVG(Fertilizer_Amount) AS Avg_Fertilizer,
+    COUNT(*) AS Record_Count
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+WHERE Yields < 200000  -- Filter outliers
+GROUP BY Location, Soil_type
+ORDER BY Avg_Yields DESC;
+
+
+3.Seasonal Yield Performance
+
+SELECT 
+    Season, 
+    Crops, 
+    AVG(Yields) AS Avg_Yields, 
+    AVG(Rainfall) AS Avg_Rainfall,
+    COUNT(*) AS Record_Count
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+WHERE Yields < 200000  -- Filter outliers
+GROUP BY Season, Crops
+ORDER BY Avg_Yields DESC;
+
+
+4.Pattern: Rainfall and Fertilizer Impact on Yields
+
+SELECT 
+    CASE 
+        WHEN Rainfall < 1000 THEN 'Low Rainfall'
+        WHEN Rainfall BETWEEN 1000 AND 3000 THEN 'Moderate Rainfall'
+        ELSE 'High Rainfall'
+    END AS Rainfall_Range,
+    CASE 
+        WHEN Fertilizer_Amount > 0 THEN 'Fertilized'
+        ELSE 'Non-Fertilized'
+    END AS Fertilizer_Status,
+    AVG(Yields) AS Avg_Yields,
+    COUNT(*) AS Record_Count
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+WHERE Yields < 200000  -- Filter outliers
+GROUP BY Rainfall_Range, Fertilizer_Status
+ORDER BY Avg_Yields DESC;

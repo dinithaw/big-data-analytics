@@ -1,0 +1,33 @@
+-- Note current time
+SELECT CURRENT_TIMESTAMP();
+
+-- Update some rows
+UPDATE AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw
+SET Yields = Yields * 1.1
+WHERE Location = 'Mangalore';
+
+-- Query previous state
+SELECT * 
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw 
+AT (TIMESTAMP => '2025-03-26 14:11:00'::TIMESTAMP)
+WHERE Location = 'Mangalore'
+LIMIT 10;
+
+
+-- Query after state
+SELECT * 
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw 
+WHERE Location = 'Mangalore'
+LIMIT 10;
+
+
+-- Drop and recover
+DROP TABLE AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw;
+
+--verify its dropped 
+SELECT * FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw LIMIT 5;
+
+--undrop 
+UNDROP TABLE AGRICULTURE_DB.DATA_ANALYSIS.agriculture_raw;
+
+

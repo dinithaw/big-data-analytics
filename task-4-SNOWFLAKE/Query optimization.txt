@@ -1,0 +1,18 @@
+ALTER TABLE AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+CLUSTER BY (Year, Crops);
+
+EXPLAIN
+SELECT 
+    Year, 
+    Crops, 
+    AVG(Yields) AS Avg_Yields
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+GROUP BY Year, Crops;
+
+
+SELECT 
+    Year, 
+    Crops, 
+    AVG(Yields) AS Avg_Yields
+FROM AGRICULTURE_DB.DATA_ANALYSIS.agriculture_integrated
+GROUP BY Year, Crops;
